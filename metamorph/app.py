@@ -87,7 +87,7 @@ class App(Gtk.Application):
             paths = [Path(f) if os.path.isabs(f) else Path(cwd) / f for f in files]
             paths = [p for p in paths if p.exists()]
             if paths:
-                GLib.timeout_add(80, self.open_wheel, paths, mode)
+                GLib.idle_add(self.open_wheel, paths, mode)
             else:  # launched from the app grid without files
                 self.show_settings()
         elif args and args[0] == "quit":

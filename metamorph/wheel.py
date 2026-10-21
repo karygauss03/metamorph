@@ -111,6 +111,7 @@ class Wheel(Gtk.Window):
         self._dropping = False
         self._hide_source = 0
         self._grabbed = None
+        self._map_handler = None
 
     # ------------------------------------------------------------ public API
 
@@ -143,7 +144,10 @@ class Wheel(Gtk.Window):
         _, x, y = display.get_default_seat().get_pointer().get_position()[0:3]
         self._place(x, y)
         self.show_all()
-        GLib.timeout_add(60, self._grab)
+        # Grab as soon as the window is on screen so early key presses aren't lost.
+        self._map_handler = self.connect("map-event", lambda *a: self._grab())
+        if self.get_mapped():
+            self._grab()
 
     def set_mode(self, mode):
         if mode != self.mode:
@@ -271,7 +275,10 @@ class Wheel(Gtk.Window):
     # ------------------------------------------------------------ pointer and keys
 
     def _grab(self):
-        if not self.get_visible():
+        if getattr(self, "_map_handler", None):
+            self.disconnect(self._map_handler)
+            self._map_handler = None
+        if not self.get_visible() or self._grabbed:
             return False
         window = self.get_window()
         seat = Gdk.Display.get_default().get_default_seat()
