@@ -52,6 +52,7 @@ class App(Gtk.Application):
         provider.load_from_data(CSS)
         Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), provider,
                                                  Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        Gtk.Window.set_default_icon_name("metamorph")
         self.notifier = Notifier()
         self.queue = JobQueue(lambda: self.settings, self.notifier)
         self.toast = Toast(self.queue)

@@ -1,3 +1,5 @@
+<p align="center"><img src="data/metamorph.svg" width="128" alt="Metamorph logo"></p>
+
 # Metamorph
 
 An offline, zero-click file converter for Linux on X11, modeled on

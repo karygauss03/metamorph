@@ -1,19 +1,146 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <defs>
-    <linearGradient id="peel" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFA24A"/>
-      <stop offset="1" stop-color="#F07A12"/>
-    </linearGradient>
-  </defs>
-  <circle cx="64" cy="68" r="52" fill="url(#peel)"/>
-  <g fill="none" stroke="#FFE2C4" stroke-width="5" stroke-linecap="round" opacity="0.9">
-    <path d="M64 30 A38 38 0 0 1 97 49"/>
-    <path d="M101 60 A38 38 0 0 1 89 96"/>
-    <path d="M78 104 A38 38 0 0 1 40 98"/>
-    <path d="M30 88 A38 38 0 0 1 28 52"/>
-    <path d="M36 41 A38 38 0 0 1 55 31"/>
-  </g>
-  <circle cx="64" cy="68" r="17" fill="#2A1606"/>
-  <path d="M64 16 C60 8 52 5 44 7 C50 14 56 17 64 16 Z" fill="#3F9142"/>
-  <path d="M64 16 L64 22" stroke="#5B3A1A" stroke-width="4" stroke-linecap="round"/>
-</svg>
+<svg id="metamorph-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-full h-full">
+                        <defs>
+                            <!-- Linear Gradients -->
+                            <linearGradient id="metaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#00f2fe" id="grad-stop-1"></stop>
+                                <stop offset="50%" stop-color="#9d4edd" id="grad-stop-2"></stop>
+                                <stop offset="100%" stop-color="#10b981" id="grad-stop-3"></stop>
+                            </linearGradient>
+
+                            <linearGradient id="metaGradRev" x1="100%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#10b981" id="grad-rev-1"></stop>
+                                <stop offset="100%" stop-color="#00f2fe" id="grad-rev-2"></stop>
+                            </linearGradient>
+
+                            <!-- Glow Filter Definition -->
+                            <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+                                <feGaussianBlur stdDeviation="7" result="blur" id="glow-blur"></feGaussianBlur>
+                                <feMerge>
+                                    <feMergeNode in="blur"></feMergeNode>
+                                    <feMergeNode in="SourceGraphic"></feMergeNode>
+                                </feMerge>
+                            </filter>
+
+                            <!-- Fine Tech Circuit Pattern for Outer Squircle Fill -->
+                            <pattern id="techGridPattern" width="32" height="32" patternUnits="userSpaceOnUse">
+                                <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.04"></path>
+                                <circle cx="16" cy="16" r="1" fill="#ffffff" opacity="0.08"></circle>
+                            </pattern>
+                        </defs>
+
+                        <!-- Layer 1: Background Squircle Base -->
+                        <rect id="svg-bg-rect" x="20" y="20" width="472" height="472" rx="100" fill="#0b0f19" stroke="#1e293b" stroke-width="4"></rect>
+                        
+                        <!-- Layer 2: Technical Grid Overlay -->
+                        <rect id="svg-tech-grid" x="20" y="20" width="472" height="472" rx="100" fill="url(#techGridPattern)"></rect>
+
+                        <!-- Layer 3: Circuit Traces & Binary Data Paths (Wings Background) -->
+                        <g id="svg-circuits-group" opacity="0.85">
+                            <!-- Left Wing Traces -->
+                            <path d="M 230 180 L 170 140 L 100 140 M 170 140 L 140 100 L 90 100" fill="none" stroke="url(#metaGrad)" stroke-width="2" stroke-dasharray="4 4"></path>
+                            <path d="M 220 280 L 150 280 L 100 330 L 70 330" fill="none" stroke="url(#metaGrad)" stroke-width="2"></path>
+                            <circle cx="100" cy="140" r="3" fill="url(#metaGrad)"></circle>
+                            <circle cx="90" cy="100" r="3" fill="url(#metaGrad)"></circle>
+                            <circle cx="70" cy="330" r="3" fill="url(#metaGrad)"></circle>
+                            <!-- Binary Micro Nodes -->
+                            <text x="110" y="125" fill="url(#metaGrad)" font-size="8" font-family="monospace" opacity="0.6">10110</text>
+                            <text x="120" y="315" fill="url(#metaGrad)" font-size="8" font-family="monospace" opacity="0.6">01001</text>
+
+                            <!-- Right Wing Traces -->
+                            <path d="M 282 180 L 342 140 L 412 140 M 342 140 L 372 100 L 422 100" fill="none" stroke="url(#metaGrad)" stroke-width="2" stroke-dasharray="4 4"></path>
+                            <path d="M 292 280 L 362 280 L 412 330 L 442 330" fill="none" stroke="url(#metaGrad)" stroke-width="2"></path>
+                            <circle cx="412" cy="140" r="3" fill="url(#metaGrad)"></circle>
+                            <circle cx="422" cy="100" r="3" fill="url(#metaGrad)"></circle>
+                            <circle cx="442" cy="330" r="3" fill="url(#metaGrad)"></circle>
+                            <!-- Binary Micro Nodes -->
+                            <text x="365" y="125" fill="url(#metaGrad)" font-size="8" font-family="monospace" opacity="0.6">11001</text>
+                            <text x="350" y="315" fill="url(#metaGrad)" font-size="8" font-family="monospace" opacity="0.6">00110</text>
+                        </g>
+
+                        <!-- Layer 4: Main Outer Wing Wings & Transformation Vector Loops -->
+                        <g id="svg-wings-group" filter="url(#neonGlow)">
+                            <!-- Upper Left Wing Structure -->
+                            <path id="wing-ul" d="M 256 210 C 210 120, 80 90, 60 170 C 45 225, 110 275, 210 260" fill="none" stroke="url(#metaGrad)" stroke-width="10" stroke-linecap="round"></path>
+                            <!-- Upper Right Wing Structure -->
+                            <path id="wing-ur" d="M 256 210 C 302 120, 432 90, 452 170 C 467 225, 402 275, 302 260" fill="none" stroke="url(#metaGrad)" stroke-width="10" stroke-linecap="round"></path>
+
+                            <!-- Lower Left Wing Conversion Loop -->
+                            <path d="M 215 280 C 140 300, 85 375, 135 430 C 185 475, 235 410, 235 360" fill="none" stroke="url(#metaGrad)" stroke-width="10" stroke-linecap="round"></path>
+                            <polygon points="225,350 245,360 236,380" fill="url(#metaGrad)"></polygon>
+
+                            <!-- Lower Right Wing Conversion Loop -->
+                            <path d="M 297 280 C 372 300, 427 375, 377 430 C 327 475, 277 410, 277 360" fill="none" stroke="url(#metaGrad)" stroke-width="10" stroke-linecap="round"></path>
+                            <polygon points="287,350 267,360 276,380" fill="url(#metaGrad)"></polygon>
+
+                            <!-- Primary Data Flow Arrows (Document -> Code/Output Transformation) -->
+                            <path d="M 235 220 L 135 150" stroke="url(#metaGrad)" stroke-width="10" stroke-linecap="round"></path>
+                            <polygon points="128,168 123,143 148,148" fill="url(#metaGrad)"></polygon>
+
+                            <path d="M 277 220 L 377 150" stroke="url(#metaGrad)" stroke-width="10" stroke-linecap="round"></path>
+                            <polygon points="384,168 389,143 364,148" fill="url(#metaGrad)"></polygon>
+                        </g>
+
+                        <!-- Layer 5: Mechanical Cog/Gear Joints & Micro Details -->
+                        <g id="svg-cogs-group">
+                            <!-- Left Wing Joint Cog -->
+                            <circle cx="205" cy="265" r="14" fill="#0b0f19" stroke="url(#metaGrad)" stroke-width="4"></circle>
+                            <circle cx="205" cy="265" r="5" fill="url(#metaGrad)"></circle>
+                            <!-- Right Wing Joint Cog -->
+                            <circle cx="307" cy="265" r="14" fill="#0b0f19" stroke="url(#metaGrad)" stroke-width="4"></circle>
+                            <circle cx="307" cy="265" r="5" fill="url(#metaGrad)"></circle>
+                        </g>
+
+                        <!-- Layer 6: Floating File Extensions & File Badges -->
+                        <g id="svg-extensions-group">
+                            <!-- Input File Node (DOC / PDF) -->
+                            <g transform="translate(90, 180)">
+                                <rect x="0" y="0" width="38" height="48" rx="6" fill="#0b0f19" stroke="url(#metaGradRev)" stroke-width="4"></rect>
+                                <path d="M 24 0 L 38 14 L 24 14 Z" fill="url(#metaGradRev)"></path>
+                                <text x="19" y="34" text-anchor="middle" fill="#ffffff" font-size="9" font-family="monospace" font-weight="bold">PDF</text>
+                            </g>
+
+                            <!-- Output File Node (PNG / IMG) -->
+                            <g transform="translate(384, 180)">
+                                <rect x="0" y="0" width="38" height="48" rx="6" fill="#0b0f19" stroke="url(#metaGradRev)" stroke-width="4"></rect>
+                                <path d="M 24 0 L 38 14 L 24 14 Z" fill="url(#metaGradRev)"></path>
+                                <text x="19" y="34" text-anchor="middle" fill="#ffffff" font-size="9" font-family="monospace" font-weight="bold">PNG</text>
+                            </g>
+
+                            <!-- Bottom Floating Micro Extensions Badges -->
+                            <g transform="translate(130, 380)">
+                                <rect x="0" y="0" width="34" height="18" rx="4" fill="#0b0f19" stroke="url(#metaGrad)" stroke-width="2"></rect>
+                                <text x="17" y="12" text-anchor="middle" fill="url(#metaGrad)" font-size="8" font-family="monospace" font-weight="bold">MP4</text>
+                            </g>
+                            <g transform="translate(348, 380)">
+                                <rect x="0" y="0" width="34" height="18" rx="4" fill="#0b0f19" stroke="url(#metaGrad)" stroke-width="2"></rect>
+                                <text x="17" y="12" text-anchor="middle" fill="url(#metaGrad)" font-size="8" font-family="monospace" font-weight="bold">WEBP</text>
+                            </g>
+                        </g>
+
+                        <!-- Layer 7: Central Butterfly Body Processor Stem & Antennae -->
+                        <g id="svg-body-group">
+                            <!-- Antennae Nodes -->
+                            <path d="M 256 150 Q 230 100 200 90" fill="none" stroke="url(#metaGrad)" stroke-width="6" stroke-linecap="round"></path>
+                            <circle cx="196" cy="88" r="7" fill="url(#metaGrad)" filter="url(#neonGlow)"></circle>
+
+                            <path d="M 256 150 Q 282 100 312 90" fill="none" stroke="url(#metaGrad)" stroke-width="6" stroke-linecap="round"></path>
+                            <circle cx="316" cy="88" r="7" fill="url(#metaGrad)" filter="url(#neonGlow)"></circle>
+
+                            <!-- Main Body Processor Spine -->
+                            <rect x="248" y="150" width="16" height="210" rx="8" fill="url(#metaGrad)" filter="url(#neonGlow)"></rect>
+                            
+                            <!-- Central Converting Gear Core -->
+                            <circle cx="256" cy="250" r="30" fill="#0b0f19" stroke="url(#metaGrad)" stroke-width="8"></circle>
+                            <circle cx="256" cy="250" r="12" fill="url(#metaGrad)"></circle>
+                            
+                            <!-- Core Gear Teeth -->
+                            <rect x="252" y="212" width="8" height="8" fill="url(#metaGrad)" rx="2"></rect>
+                            <rect x="252" y="280" width="8" height="8" fill="url(#metaGrad)" rx="2"></rect>
+                            <rect x="218" y="246" width="8" height="8" fill="url(#metaGrad)" rx="2"></rect>
+                            <rect x="286" y="246" width="8" height="8" fill="url(#metaGrad)" rx="2"></rect>
+
+                            <!-- Glowing Core Nodes -->
+                            <circle cx="256" cy="165" r="5" fill="#0b0f19" stroke="#00f2fe" stroke-width="3"></circle>
+                            <circle cx="256" cy="345" r="5" fill="#0b0f19" stroke="#10b981" stroke-width="3"></circle>
+                        </g>
+                    </svg>

@@ -127,7 +127,7 @@ class Notifier:
         if not self.bus:
             return
         actions = ["default", "Show", "show", "Show in Files"] if path else []
-        params = GLib.Variant("(susssasa{sv}i)", ("Metamorph", 0, "emblem-synchronizing-symbolic",
+        params = GLib.Variant("(susssasa{sv}i)", ("Metamorph", 0, "metamorph",
                                                  summary, body, actions, {}, 6000))
 
         def done(bus, result):
