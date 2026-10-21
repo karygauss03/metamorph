@@ -165,6 +165,7 @@ class Toast(Gtk.Window):
         self.cards = {}
         self._hide_source = 0
         queue.listeners.append(self.update)
+        self.connect("size-allocate", lambda *a: self._place())
 
     def update(self, job):
         card = self.cards.get(job.id)
@@ -180,6 +181,9 @@ class Toast(Gtk.Window):
         self.show_all()
         for c in self.cards.values():  # show_all() revealed every child; re-apply states
             c.refresh()
+        # Shrink to the content (hidden buttons must not leave a gap); the
+        # size-allocate handler re-anchors the window to the corner.
+        self.resize(1, 1)
         self._place()
 
     def _expire(self, job_id):
