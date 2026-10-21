@@ -71,7 +71,7 @@ bindings, all present on a stock Ubuntu 24.04 desktop
 (`sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-rsvg-2.0 python3-xlib` elsewhere).
 
 ```sh
-git clone https://github.com/thekolabs/metamorph.git
+git clone https://github.com/karygauss03/metamorph.git
 cd metamorph
 ./install.sh              # or: ./install.sh --no-autostart
 nautilus -q               # once, so Files picks up the F4 shortcut
