@@ -1,9 +1,9 @@
 # Metamorph website
 
-The product site and interactive demo for [Metamorph](https://github.com/karygauss03/metamorph),
-a drag-and-drop file converter for Linux.
+The product site and interactive demo for Metamorph, served from this folder by GitHub Pages
+(see `.github/workflows/pages.yml` at the repository root).
 
-**Live:** https://karygauss03.github.io/metamorph-site/
+**Live:** https://karygauss03.github.io/metamorph/
 
 The demo on the page is a small simulated file manager: drag a file, hold
 <kbd>Shift</kbd>, <kbd>Alt</kbd> or <kbd>Ctrl</kbd>, and drop it on a slice of the wheel.
@@ -28,6 +28,7 @@ the page also works when opened straight from disk.
 ## Run locally
 
 ```sh
+cd site
 python3 -m http.server 8000
 ```
 
@@ -36,4 +37,4 @@ Then open http://localhost:8000.
 ## Credits
 
 Icons from [lucide](https://lucide.dev) (ISC). Fonts: Inter and JetBrains Mono (OFL),
-served by Google Fonts. Site code under the MIT License.
+served by Google Fonts. Site code is covered by the repository's MIT License.
