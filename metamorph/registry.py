@@ -32,7 +32,7 @@ CATEGORIES = {
 # Inputs that can only be read, never offered as a target from their own category.
 EXTRA_TARGETS = {"gif": ["mp4", "webm"]}
 
-LABELS = {"tar.gz": "TAR.GZ", "webp": "WebP", "md": "Markdown", "txt": "Text", "epub": "EPUB"}
+LABELS = {"tar.gz": "TAR.GZ", "webp": "WebP", "webm": "WebM", "md": "Markdown", "txt": "Text", "epub": "EPUB"}
 
 CATEGORY_LABELS = {
     "image": "Image", "audio": "Audio", "video": "Video", "pdf": "PDF", "document": "Document",
