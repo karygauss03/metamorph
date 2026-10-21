@@ -5,3 +5,6 @@ __pycache__/
 
 # Local environment created by install.sh
 .venv/
+
+# Local gate receipts from the design kit
+.ds-receipts/

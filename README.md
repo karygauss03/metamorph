@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="https://karygauss03.github.io/metamorph-site/"><b>Try the interactive demo in your browser</b></a>
+  <a href="https://karygauss03.github.io/metamorph/"><b>Try the interactive demo in your browser</b></a>
 </p>
 
 ## Why Metamorph
