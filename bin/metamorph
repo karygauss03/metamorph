@@ -1,0 +1,5 @@
+#!/bin/sh
+# Launcher: run Metamorph with the project's virtualenv.
+ROOT="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+export PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}"
+exec "$ROOT/.venv/bin/python" -m metamorph "$@"
