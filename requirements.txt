@@ -1,0 +1,10 @@
+pillow>=11.3
+pillow-heif
+pymupdf
+pdf2docx
+python-pptx
+python-docx
+openpyxl
+# Bundled binaries, used when the system has no ffmpeg / pandoc
+imageio-ffmpeg
+pypandoc_binary

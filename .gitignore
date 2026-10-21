@@ -1,0 +1,7 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local environment created by install.sh
+.venv/
