@@ -127,6 +127,9 @@ class App(Gtk.Application):
     def choose(self, op, paths):
         if op.kind == "action":
             self.run_action(op, paths)
+        elif op.editor == "crop":
+            from .cropper import CropWindow
+            CropWindow(paths, lambda params: self.queue.submit(op, paths, params))
         elif op.params:
             ParamsDialog(op, paths, lambda params: self.queue.submit(op, paths, params))
         else:

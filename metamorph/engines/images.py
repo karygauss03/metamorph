@@ -189,16 +189,40 @@ CROP_RATIOS = {"Square 1:1": (1, 1), "Landscape 16:9": (16, 9), "Landscape 4:3":
                "Portrait 9:16": (9, 16), "Portrait 4:5": (4, 5)}
 
 
+def content_box(img):
+    """Bounding box of everything that differs from the top-left pixel's colour."""
+    from PIL import ImageChops
+    rgb = flatten(img)
+    bg = Image.new("RGB", rgb.size, rgb.getpixel((0, 0)))
+    diff = ImageChops.difference(rgb, bg).convert("L").point(lambda v: 255 if v > 12 else 0)
+    return diff.getbbox()
+
+
+def parse_rect(text):
+    """'x0,y0,x1,y1' as fractions of the width/height (so one rect fits a batch)."""
+    try:
+        x0, y0, x1, y1 = (min(1.0, max(0.0, float(v))) for v in str(text).split(","))
+    except ValueError:
+        raise ConversionError(f"Invalid crop rectangle: {text}")
+    if x1 <= x0 or y1 <= y0:
+        raise ConversionError("The crop rectangle is empty")
+    return x0, y0, x1, y1
+
+
 def crop(src, ctx):
     mode = ctx.params.get("shape", "Trim borders")
+    rect = parse_rect(ctx.params["rect"]) if ctx.params.get("rect") else None
 
     def transform(img):
+        if rect:
+            x0, y0, x1, y1 = rect
+            box = (round(x0 * img.width), round(y0 * img.height),
+                   round(x1 * img.width), round(y1 * img.height))
+            if box[2] - box[0] < 1 or box[3] - box[1] < 1:
+                raise ConversionError("The crop rectangle is smaller than one pixel")
+            return img.crop(box)
         if mode == "Trim borders":
-            rgb = flatten(img)
-            bg = Image.new("RGB", rgb.size, rgb.getpixel((0, 0)))
-            from PIL import ImageChops
-            diff = ImageChops.difference(rgb, bg).convert("L").point(lambda v: 255 if v > 12 else 0)
-            box = diff.getbbox()
+            box = content_box(img)
             return img.crop(box) if box else img
         rw, rh = CROP_RATIOS[mode]
         target = rw / rh

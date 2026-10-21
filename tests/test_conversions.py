@@ -76,6 +76,7 @@ TOOL_CASES = [
     ("tool:image:compress", ["jpg"], {}), ("tool:image:compress", ["png"], {}),
     ("tool:image:resize", ["heic"], {"size": "50%"}), ("tool:image:resize", ["png"], {"size": "800 px wide"}),
     ("tool:image:crop", ["png"], {"shape": "Trim borders"}), ("tool:image:crop", ["jpg"], {"shape": "Square 1:1"}),
+    ("tool:image:crop", ["heic"], {"rect": "0.25,0.1,0.75,0.9"}),
     ("tool:image:rotate", ["webp"], {}), ("tool:image:flip", ["gif"], {}),
     ("tool:image:grayscale", ["png"], {}), ("tool:image:strip", ["jpg"], {}),
     ("tool:video:compress", ["mov"], {}), ("tool:media:trim", ["mp4"], {"start": "0:00.5", "end": "1.5"}),
@@ -132,3 +133,19 @@ def test_parse_number(text, value):
     from metamorph.util import parse_number
     assert parse_number(text) == value and type(parse_number(text)) is type(value)
 
+
+def test_freeform_crop_box(fixtures, tmp_path):
+    from PIL import Image
+    op = registry.ALL["tool:image:crop"]
+    ctx = registry.Context(settings.DEFAULTS, {"rect": "0.25,0.1,0.75,0.9"}, out_dir=str(tmp_path))
+    [out] = registry.execute(op, [sample(fixtures, "png")], ctx)
+    assert Image.open(out).size == (160, 160)  # 320x200 source
+
+
+@pytest.mark.parametrize("rect", ["0.5,0,0.5,1", "a,b,c,d", "0.1,0.2,0.3"])
+def test_freeform_crop_rejects_bad_rect(fixtures, tmp_path, rect):
+    from metamorph.util import ConversionError
+    op = registry.ALL["tool:image:crop"]
+    ctx = registry.Context(settings.DEFAULTS, {"rect": rect}, out_dir=str(tmp_path))
+    with pytest.raises(ConversionError):
+        registry.execute(op, [sample(fixtures, "png")], ctx)

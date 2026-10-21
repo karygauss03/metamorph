@@ -86,6 +86,7 @@ class Operation:
     requires: tuple = ()
     description: str = ""
     target: str = ""
+    editor: str = ""               # interactive window used instead of the params dialog
 
     def available(self):
         return all(_REQUIREMENTS[r]() for r in self.requires)
@@ -237,8 +238,9 @@ TOOLS = [
     Operation("tool:image:crop", "Crop", "tool", frozenset({"image"}), _lazy("images", "crop"),
               params=[Param("shape", "Crop to", "choice", "Trim borders",
                             ("Trim borders", "Square 1:1", "Landscape 16:9", "Landscape 4:3",
-                             "Portrait 9:16", "Portrait 4:5"))],
-              description="Trim borders or crop to a ratio"),
+                             "Portrait 9:16", "Portrait 4:5")),
+                      Param("rect", "Rectangle", "text", "", hint="x0,y0,x1,y1 as fractions, e.g. 0.1,0,0.9,1")],
+              editor="crop", description="Draw the area to keep"),
     Operation("tool:image:rotate", "Rotate", "tool", frozenset({"image"}), _lazy("images", "rotate"), params=[ANGLE],
               description="Turn 90° or 180°"),
     Operation("tool:image:flip", "Flip", "tool", frozenset({"image"}), _lazy("images", "flip"),

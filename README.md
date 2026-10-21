@@ -54,7 +54,9 @@ produce a folder.
 
 **26 tools**:
 
-- **Images:** compress, resize, crop (trim borders or a fixed ratio), rotate, flip, grayscale, strip metadata.
+- **Images:** compress, resize, crop, rotate, flip, grayscale, strip metadata. Crop opens an
+  editor: drag to select, resize from the handles, lock an aspect ratio, Fit to Content, arrow
+  keys nudge (Shift for 10 px), Enter crops. With several images, the same area is cropped from each.
 - **Video:** compress, trim, split, mute, extract audio, rotate, resize, change speed.
 - **Audio:** compress, normalize loudness.
 - **PDF:** compress, split, extract pages, remove pages, rotate, extract images.
@@ -90,6 +92,7 @@ description.
 ```sh
 metamorph to webp photo.heic          # convert
 metamorph run tool:media:trim talk.mp4 -p start=1:00 -p end=2:30
+metamorph run tool:image:crop a.jpg -p rect=0.1,0,0.9,1   # x0,y0,x1,y1 as fractions
 metamorph list report.pdf             # what applies to a file
 metamorph doctor                      # backends and counts
 METAMORPH_DEBUG=1 metamorph           # log what the drag watcher sees
