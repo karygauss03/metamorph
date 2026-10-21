@@ -2,8 +2,9 @@
 
 from pathlib import Path
 
+import cairo
 from gi.repository import Gdk, GdkPixbuf, GLib, Gtk
-from PIL import ImageOps
+from PIL import Image, ImageOps
 
 from .engines import images
 from .util import ConversionError
@@ -31,20 +32,22 @@ class CropWindow(Gtk.Window):
         super().__init__(title="Crop")
         self.paths, self.on_run = [Path(p) for p in paths], on_run
         try:
-            self.image = ImageOps.exif_transpose(images.open_image(self.paths[0]))
+            preview = self._load_preview(self.paths[0])
         except ConversionError as exc:
             self._fail(str(exc))
             return
-        self.iw, self.ih = self.image.size
-        preview = self.image.convert("RGBA")
-        preview.thumbnail((PREVIEW_MAX, PREVIEW_MAX))
+        self._full = None
+        self.has_alpha = "A" in preview.getbands()
         self.pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
-            GLib.Bytes.new(preview.tobytes()), GdkPixbuf.Colorspace.RGB, True, 8,
+            GLib.Bytes.new(preview.convert("RGBA").tobytes()), GdkPixbuf.Colorspace.RGB, True, 8,
             preview.width, preview.height, preview.width * 4)
         self.rect = [0.0, 0.0, float(self.iw), float(self.ih)]
         self.ratio = None
         self.drag = None
         self.hover = None
+        self._base = None        # cached canvas + scaled image for the current allocation
+        self._base_key = None
+        self._dirty = None       # view-space box of the overlay drawn last frame
 
         self.set_keep_above(True)
         self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
@@ -70,6 +73,42 @@ class CropWindow(Gtk.Window):
         self.area.grab_focus()
 
     # ------------------------------------------------------------ construction
+
+    def _load_preview(self, path):
+        """Open a screen-sized preview quickly and record the full oriented size.
+
+        JPEGs are decoded at reduced scale (draft mode), so a 24 MP photo opens
+        in a fraction of the time a full decode takes. The full image is only
+        loaded if Fit to Content needs it.
+        """
+        if path.suffix.lower() in (".svg", ".svgz"):
+            img = ImageOps.exif_transpose(images.open_image(path))
+            self.iw, self.ih = img.size
+            img.thumbnail((PREVIEW_MAX, PREVIEW_MAX))
+            return img
+        try:
+            img = Image.open(path)
+        except Exception as exc:
+            raise ConversionError(f"Cannot read image {path.name}: {exc}")
+        width, height = img.size
+        orientation = img.getexif().get(0x0112, 1)
+        if orientation in (5, 6, 7, 8):  # rotated 90°: the oriented image is tall where the file is wide
+            width, height = height, width
+        self.iw, self.ih = width, height
+        if img.format == "JPEG":
+            img.draft("RGB", (PREVIEW_MAX, PREVIEW_MAX))
+        try:
+            img = ImageOps.exif_transpose(img)
+        except Exception as exc:
+            raise ConversionError(f"Cannot read image {path.name}: {exc}")
+        img.thumbnail((PREVIEW_MAX, PREVIEW_MAX))
+        return img
+
+    @property
+    def image(self):
+        if self._full is None:
+            self._full = ImageOps.exif_transpose(images.open_image(self.paths[0]))
+        return self._full
 
     def _fail(self, message):
         dialog = Gtk.MessageDialog(message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.CLOSE,
@@ -121,6 +160,7 @@ class CropWindow(Gtk.Window):
         reset.connect("clicked", self._on_reset)
         bar.pack_start(reset, False, False, 0)
         self.size_label = Gtk.Label(xalign=1)
+        self.size_label.set_width_chars(40)  # fixed width: updating it must not re-layout the bar
         self.size_label.get_style_context().add_class("dim-label")
         bar.pack_end(self.size_label, False, False, 0)
         return bar
@@ -333,11 +373,29 @@ class CropWindow(Gtk.Window):
         self.rect = [0.0, 0.0, float(self.iw), float(self.ih)]
         self._update()
 
+    def _overlay_box(self):
+        """View-space bounds of everything the selection draws (outline, handles, guides)."""
+        scale, ox, oy = self._view()
+        x0, y0, x1, y1 = self.rect
+        pad = HANDLE + 2
+        return (int(x0 * scale + ox - pad), int(y0 * scale + oy - pad),
+                int(x1 * scale + ox + pad) + 1, int(y1 * scale + oy + pad) + 1)
+
     def _update(self):
         x0, y0, x1, y1 = self._pixel_box()
-        self.size_label.set_text(f"{x1 - x0} × {y1 - y0} px   at {x0}, {y0}   of {self.iw} × {self.ih}")
+        text = f"{x1 - x0} × {y1 - y0} px   at {x0}, {y0}   of {self.iw} × {self.ih}"
+        if self.size_label.get_text() != text:
+            self.size_label.set_text(text)
         self.crop_button.set_sensitive((x0, y0, x1, y1) != (0, 0, self.iw, self.ih) and x1 > x0 and y1 > y0)
-        self.area.queue_draw()
+        # Outside both the old and the new selection the shading is unchanged, so only
+        # the union of the two needs repainting.
+        new, old = self._overlay_box(), self._dirty
+        if old is None:
+            self.area.queue_draw()
+            return
+        left, top = min(new[0], old[0]), min(new[1], old[1])
+        right, bottom = max(new[2], old[2]), max(new[3], old[3])
+        self.area.queue_draw_area(left, top, right - left, bottom - top)
 
     def _submit(self):
         if not self.crop_button.get_sensitive():
@@ -349,42 +407,60 @@ class CropWindow(Gtk.Window):
 
     # ------------------------------------------------------------ drawing
 
-    def _on_draw(self, widget, cr):
+    def _base_surface(self, widget, width, height):
+        """Canvas, checkerboard and scaled image, rendered once per window size.
+
+        The surface is created like the window's own (server-side on X11), so
+        each frame is a single blit instead of re-scaling the photo.
+        """
+        if self._base is not None and self._base_key == (width, height):
+            return self._base
         scale, ox, oy = self._view()
-        w, h = widget.get_allocated_width(), widget.get_allocated_height()
+        iw, ih = max(1, round(self.iw * scale)), max(1, round(self.ih * scale))
+        ox, oy = round(ox), round(oy)
+        surface = widget.get_window().create_similar_surface(cairo.CONTENT_COLOR, width, height)
+        cr = cairo.Context(surface)
         cr.set_source_rgb(*CANVAS)
         cr.paint()
-        iw, ih = self.iw * scale, self.ih * scale
-
-        # Checkerboard shows transparency.
-        cr.save()
-        cr.rectangle(ox, oy, iw, ih)
-        cr.clip()
-        tile = 10
-        for ty in range(int(ih // tile) + 1):
-            for tx in range(int(iw // tile) + 1):
-                cr.set_source_rgb(*((0.42,) * 3 if (tx + ty) % 2 else (0.34,) * 3))
-                cr.rectangle(ox + tx * tile, oy + ty * tile, tile, tile)
-                cr.fill()
-        cr.restore()
-
-        cr.save()
-        cr.translate(ox, oy)
-        factor = iw / self.pixbuf.get_width()
-        cr.scale(factor, factor)
-        Gdk.cairo_set_source_pixbuf(cr, self.pixbuf, 0, 0)
-        cr.get_source().set_filter(1)  # GOOD
+        if self.has_alpha:  # checkerboard behind transparent pixels, as one repeating pattern
+            tile = cairo.ImageSurface(cairo.FORMAT_RGB24, 20, 20)
+            t = cairo.Context(tile)
+            t.set_source_rgb(0.42, 0.42, 0.42)
+            t.paint()
+            t.set_source_rgb(0.34, 0.34, 0.34)
+            t.rectangle(0, 0, 10, 10)
+            t.rectangle(10, 10, 10, 10)
+            t.fill()
+            pattern = cairo.SurfacePattern(tile)
+            pattern.set_extend(cairo.EXTEND_REPEAT)
+            pattern.set_matrix(cairo.Matrix(x0=-ox, y0=-oy))
+            cr.set_source(pattern)
+            cr.rectangle(ox, oy, iw, ih)
+            cr.fill()
+        scaled = self.pixbuf.scale_simple(iw, ih, GdkPixbuf.InterpType.BILINEAR)
+        Gdk.cairo_set_source_pixbuf(cr, scaled, ox, oy)
         cr.paint()
-        cr.restore()
+        self._base, self._base_key = surface, (width, height)
+        return surface
 
+    def _on_draw(self, widget, cr):
+        width, height = widget.get_allocated_width(), widget.get_allocated_height()
+        cr.set_source_surface(self._base_surface(widget, width, height), 0, 0)
+        cr.paint()
+
+        scale, ox, oy = self._view()
+        left, top = round(ox), round(oy)
+        right, bottom = left + round(self.iw * scale), top + round(self.ih * scale)
         x0, y0, x1, y1 = (v * scale for v in self.rect)
         x0, x1, y0, y1 = x0 + ox, x1 + ox, y0 + oy, y1 + oy
-        cr.set_fill_rule(1)  # EVEN_ODD: shade everything outside the selection
-        cr.rectangle(ox, oy, iw, ih)
-        cr.rectangle(x0, y0, x1 - x0, y1 - y0)
+
+        # Shade outside the selection: four plain rectangles around it.
+        cr.rectangle(left, top, right - left, y0 - top)
+        cr.rectangle(left, y1, right - left, bottom - y1)
+        cr.rectangle(left, y0, x0 - left, y1 - y0)
+        cr.rectangle(x1, y0, right - x1, y1 - y0)
         cr.set_source_rgba(*SHADE)
         cr.fill()
-        cr.set_fill_rule(0)
 
         if self.drag:  # rule-of-thirds guides while adjusting
             cr.set_source_rgba(*GUIDE)
@@ -392,8 +468,10 @@ class CropWindow(Gtk.Window):
             for i in (1, 2):
                 gx = x0 + (x1 - x0) * i / 3
                 gy = y0 + (y1 - y0) * i / 3
-                cr.move_to(gx, y0); cr.line_to(gx, y1)
-                cr.move_to(x0, gy); cr.line_to(x1, gy)
+                cr.move_to(gx, y0)
+                cr.line_to(gx, y1)
+                cr.move_to(x0, gy)
+                cr.line_to(x1, gy)
             cr.stroke()
 
         cr.set_source_rgba(*LINE)
@@ -404,8 +482,9 @@ class CropWindow(Gtk.Window):
         mx, my = (x0 + x1) / 2, (y0 + y1) / 2
         for hx, hy in ((x0, y0), (mx, y0), (x1, y0), (x1, my), (x1, y1), (mx, y1), (x0, y1), (x0, my)):
             cr.rectangle(hx - HANDLE / 2, hy - HANDLE / 2, HANDLE, HANDLE)
-            cr.set_source_rgb(*ACCENT)
-            cr.fill_preserve()
-            cr.set_source_rgba(0, 0, 0, 0.6)
-            cr.set_line_width(1)
-            cr.stroke()
+        cr.set_source_rgb(*ACCENT)
+        cr.fill_preserve()
+        cr.set_source_rgba(0, 0, 0, 0.6)
+        cr.set_line_width(1)
+        cr.stroke()
+        self._dirty = self._overlay_box()
