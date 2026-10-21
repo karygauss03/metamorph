@@ -626,6 +626,21 @@ function encoderSupported(mime) {
   return encoderCache[mime];
 }
 
+// On file:// pages, draw the demo photos from data URLs so the canvas can be exported.
+const localImages = location.protocol === "file:"
+  ? new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = "assets/js/local-images.js";
+    script.onload = () => resolve(window.METAMORPH.LOCAL_IMAGES || {});
+    script.onerror = () => resolve({});
+    document.head.append(script);
+  })
+  : Promise.resolve({});
+
+async function canvasSource(src) {
+  return (await localImages)[src] || src;
+}
+
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -651,7 +666,7 @@ function drawWith(canvas, img, cfg) {
 }
 
 async function encode(src, mime, draw, quality = 0.9) {
-  const img = await loadImage(src);
+  const img = await loadImage(await canvasSource(src));
   const canvas = document.createElement("canvas");
   if (draw.length < 2) { // plain re-encode
     canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
@@ -661,8 +676,15 @@ async function encode(src, mime, draw, quality = 0.9) {
   } else {
     draw(canvas, img);
   }
-  return new Promise((resolve, reject) => canvas.toBlob(
-    (b) => (b ? resolve(b) : reject(new Error("the browser cannot encode this format"))), mime, quality));
+  return new Promise((resolve, reject) => {
+    try {
+      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("the browser cannot encode this format"))), mime, quality);
+    } catch (err) {
+      reject(new Error(err.name === "SecurityError"
+        ? "the browser blocked reading this image. Open the page over http(s) instead of from disk"
+        : err.message));
+    }
+  });
 }
 
 function trackUrl(blob) {
@@ -769,13 +791,17 @@ async function openCrop(file) {
     const name = uniqueName(`${baseName(file.name)} (cropped).${outExt}`);
     const sx = Math.round(r.x0 * W), sy = Math.round(r.y0 * H);
     const sw = Math.max(1, Math.round((r.x1 - r.x0) * W)), sh = Math.max(1, Math.round((r.y1 - r.y0) * H));
-    const blob = await encode(file.imageSrc, ENCODERS[outExt], (canvas, image) => {
-      canvas.width = sw; canvas.height = sh;
-      canvas.getContext("2d").drawImage(image, sx, sy, sw, sh, 0, 0, sw, sh);
-    });
-    const url = trackUrl(blob);
-    addFile(makeFile({ name, kind: "image", thumb: url, imageSrc: url }));
-    t.done(`Saved ${name}, ${sw} x ${sh} px. Cropped in your browser.`, { download: { url, name } });
+    try {
+      const blob = await encode(file.imageSrc, ENCODERS[outExt], (canvas, image) => {
+        canvas.width = sw; canvas.height = sh;
+        canvas.getContext("2d").drawImage(image, sx, sy, sw, sh, 0, 0, sw, sh);
+      });
+      const url = trackUrl(blob);
+      addFile(makeFile({ name, kind: "image", thumb: url, imageSrc: url }));
+      t.done(`Saved ${name}, ${sw} x ${sh} px. Cropped in your browser.`, { download: { url, name } });
+    } catch (err) {
+      t.done(`Could not finish: ${err.message}`, { error: true });
+    }
   }
   wrap.addEventListener("click", (e) => {
     const act = e.target.closest("[data-act]")?.dataset.act;
