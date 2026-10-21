@@ -1,0 +1,171 @@
+/* Metamorph site tokens: the only place raw values live.
+   Primitives are named by what they are; semantic tokens by what they are for.
+   Components read semantic tokens only. */
+
+:root {
+  color-scheme: dark;
+
+  /* ---- primitives: color ---- */
+  --navy-975: #070a12;
+  --navy-950: #0b0f19;
+  --navy-900: #0f1524;
+  --navy-850: #131a2c;
+  --navy-800: #182136;
+  --navy-750: #1e2942;
+  --navy-700: #2a3754;
+  --navy-600: #3a4a6b;
+  --ink-50: #eef2f8;
+  --ink-200: #c6cfdd;
+  --ink-300: #a9b5c8;
+  --ink-400: #8e9cb3;
+  --cyan-300: #7af8fe;
+  --cyan-400: #00f2fe;
+  --cyan-500: #00d4de;
+  --cyan-950: #03161c;
+  --violet-300: #c9a2f0;
+  --violet-500: #9d4edd;
+  --green-300: #6ee7b7;
+  --green-500: #10b981;
+  --red-300: #fca5a5;
+  --white-a06: rgb(238 242 248 / 0.06);
+  --white-a10: rgb(238 242 248 / 0.1);
+  --navy-a72: rgb(7 10 18 / 0.72);
+  --navy-a92: rgb(11 15 25 / 0.94);
+  --cyan-a14: rgb(0 242 254 / 0.14);
+  --cyan-a30: rgb(0 242 254 / 0.3);
+  --violet-a18: rgb(157 78 221 / 0.18);
+
+  /* ---- semantic: color ---- */
+  --color-bg: var(--navy-950);
+  --color-bg-deep: var(--navy-975);
+  --color-surface: var(--navy-900);
+  --color-surface-raised: var(--navy-850);
+  --color-surface-hover: var(--navy-800);
+  --color-surface-pressed: var(--navy-750);
+  --color-border: var(--navy-700);
+  --color-border-strong: var(--navy-600);
+  --color-text: var(--ink-50);
+  --color-text-muted: var(--ink-300);
+  --color-text-subtle: var(--ink-400);
+  --color-primary: var(--cyan-400);
+  --color-primary-hover: var(--cyan-300);
+  --color-primary-pressed: var(--cyan-500);
+  --color-on-primary: var(--cyan-950);
+  --color-primary-tint: var(--cyan-a14);
+  --color-accent: var(--violet-500);
+  --color-accent-text: var(--violet-300);
+  --color-accent-tint: var(--violet-a18);
+  --color-success: var(--green-500);
+  --color-success-text: var(--green-300);
+  --color-error-text: var(--red-300);
+  --color-focus-ring: var(--cyan-300);
+  --color-scrim: var(--navy-a72);
+  --color-hud: var(--navy-a92);
+  --color-hairline: var(--white-a10);
+  --color-wash: var(--white-a06);
+  --color-glow: var(--cyan-a30);
+  --gradient-brand: linear-gradient(100deg, var(--cyan-400) 0%, var(--violet-500) 52%, var(--green-500) 100%);
+
+  /* ---- typography ---- */
+  --font-sans: "Inter", "Ubuntu Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "Ubuntu Mono", ui-monospace, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.5rem;
+  --text-2xl: clamp(1.75rem, 1.2rem + 2.2vw, 2.5rem);
+  --text-3xl: clamp(2rem, 1.4rem + 2.4vw, 2.75rem);
+  --text-display: clamp(2.75rem, 1.4rem + 4.6vw, 5rem);
+  --text-figure: clamp(4rem, 1.5rem + 13vw, 11rem);
+  --leading-tight: 1.02;
+  --leading-snug: 1.2;
+  --leading-body: 1.6;
+  --tracking-display: -0.045em;
+  --tracking-tight: -0.02em;
+  --tracking-caps: 0.08em;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-black: 800;
+  --measure-display: 20ch;
+  --measure-body: 62ch;
+
+  /* ---- space: 4px rhythm ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-gutter: 1rem;
+  --space-section: clamp(5rem, 3rem + 9vw, 10rem);
+  --page-max: 75rem;
+
+  /* ---- shape ---- */
+  --radius-xs: 4px;
+  --radius-sm: 7px;
+  --radius-md: 11px;
+  --radius-lg: 18px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+  --border-hairline: 1px;
+  --border-strong: 2px;
+  --focus-width: 3px;
+  --focus-offset: 2px;
+
+  /* ---- elevation: used rarely ---- */
+  --shadow-window: 0 40px 80px -24px rgb(2 5 12 / 0.55), 0 0 0 1px var(--white-a06);
+  --shadow-overlay: 0 18px 48px -12px rgb(2 5 12 / 0.5);
+  --shadow-media: 0 24px 60px -30px rgb(0 242 254 / 0.22), 0 0 0 1px var(--white-a10);
+  --shadow-glow: 0 0 0 1px var(--cyan-a30), 0 0 32px -6px var(--cyan-a30);
+
+  /* ---- sizes ---- */
+  --size-touch: 44px;
+  --size-icon: 1.125rem;
+  --size-icon-lg: 1.5rem;
+  --size-file: 5.75rem;
+  --size-thumb: 3.5rem;
+  --size-ghost: 3rem;
+  --size-wheel: min(90vw, 26rem);
+  --size-toast: min(86vw, 20rem);
+  --size-stage-min: 30rem;
+  --size-logo: 2rem;
+
+  /* ---- motion ---- */
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 420ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --z-wheel: 30;
+  --z-dialog: 40;
+  --z-ghost: 50;
+  --z-nav: 60;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --space-gutter: 2rem;
+    --size-file: 6.5rem;
+    --size-thumb: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 0ms;
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+  }
+}

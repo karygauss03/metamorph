@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Metamorph: drag, hold a key, drop. A file converter for Linux.</title>
+  <meta name="description" content="Metamorph converts files without leaving your desktop. Drag a file, hold Shift and drop it on the format you want. 317 conversions, 26 tools, fully offline. Try it in your browser.">
+  <!-- ds-allow-hardcode: browsers read theme-color as a literal; mirrors --color-bg --><meta name="theme-color" content="#0b0f19">
+  <meta property="og:title" content="Metamorph: drag, hold a key, drop">
+  <meta property="og:description" content="A drag-and-drop file converter for Linux. Try the interactive demo in your browser.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://karygauss03.github.io/metamorph/">
+  <meta property="og:image" content="https://karygauss03.github.io/metamorph/assets/img/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <link rel="canonical" href="https://karygauss03.github.io/metamorph/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="assets/css/tokens.css">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <script defer src="assets/js/data.js"></script>
+  <script defer src="assets/js/icons.js"></script>
+  <script defer src="assets/js/wheel.js"></script>
+  <script defer src="assets/js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#demo">Skip to the demo</a>
+
+  <header class="nav">
+    <div class="nav__inner">
+      <a class="brand" href="#top" aria-label="Metamorph, back to top">
+        <img src="assets/img/logo.svg" alt="" class="brand__logo" width="32" height="32">
+        <span class="brand__name">Metamorph</span>
+      </a>
+      <nav aria-label="Sections">
+        <ul class="nav__links">
+          <li><a href="#wheels">Wheels</a></li>
+          <li><a href="#formats">Formats</a></li>
+          <li><a href="#tour">Tour</a></li>
+          <li><a class="button button--ghost button--small" href="#install">Install</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__copy">
+        <h1 id="hero-title" class="display">Drop a file on the format you want.</h1>
+        <p class="lead">Metamorph is a file converter for Linux that lives under your cursor. Drag any file, hold <kbd>Shift</kbd>, and a wheel of formats opens right where you are. Nothing to open, nothing to upload.</p>
+      </div>
+
+      <div class="demo" id="demo">
+        <h2 class="visually-hidden">Interactive demo</h2>
+        <div class="stage" id="stage">
+          <div class="window" role="application" aria-roledescription="file manager demo" aria-describedby="demo-help">
+            <div class="window__bar">
+              <span class="window__crumb">Home</span>
+              <span class="window__sep" aria-hidden="true">/</span>
+              <span class="window__crumb window__crumb--current">Metamorph Demo</span>
+              <button type="button" class="button button--ghost button--small window__reset" id="reset">Reset</button>
+            </div>
+            <ul class="files" id="files" aria-label="Files in Metamorph Demo"></ul>
+            <p class="window__cue" id="window-cue" aria-hidden="true"><span data-icon="mouse-pointer-2"></span>Drag a file, then hold <kbd>Shift</kbd>, <kbd>Alt</kbd> or <kbd>Ctrl</kbd></p>
+            <div class="dropzone-hint" id="dropzone-hint" hidden>
+              Drop to add it to the folder, or hold <kbd>Shift</kbd> to open the wheel
+            </div>
+          </div>
+          <div class="wheel-layer" id="wheel-layer" hidden></div>
+          <ol class="toasts" id="toasts" aria-live="polite" aria-label="Jobs"></ol>
+          <div class="shelf" id="shelf" hidden>
+            <p class="shelf__title">Float</p>
+            <ul class="shelf__items" id="shelf-items"></ul>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="keys" role="group" aria-label="Wheel keys. On touch screens, tap one, then drag a file.">
+            <button type="button" class="key" data-mode="convert" aria-pressed="false">
+              <kbd class="key__cap">Shift</kbd><span class="key__label">Convert</span>
+            </button>
+            <button type="button" class="key" data-mode="tool" aria-pressed="false">
+              <kbd class="key__cap">Alt</kbd><span class="key__label">Tools</span>
+            </button>
+            <button type="button" class="key" data-mode="action" aria-pressed="false">
+              <kbd class="key__cap">Ctrl</kbd><span class="key__label">Actions</span>
+            </button>
+          </div>
+          <p class="hint" id="demo-help" aria-live="polite">Drag a file and hold <kbd>Shift</kbd>. Or focus a file and press <kbd>Enter</kbd>.</p>
+        </div>
+        <p class="footnote">Images convert for real, in your browser, and you can drop one of your own. Everything else is simulated here and done locally by the app.</p>
+      </div>
+    </section>
+
+    <section class="wheels" id="wheels" aria-labelledby="wheels-title">
+      <div class="wheels__lead">
+        <div class="wheels__intro">
+          <h2 id="wheels-title" class="title">Three keys. Every move a file can make.</h2>
+          <p class="body-lg">Hold a key while you drag. The wheel only offers what makes sense for that file, so a video never shows you PowerPoint.</p>
+        </div>
+        <figure class="wheel-figure wheel-figure--large">
+          <div class="wheel-static" data-static-wheel="convert" data-file="Product Launch.mov"></div>
+          <figcaption><kbd>Shift</kbd> <span class="figcaption__strong">Convert</span> every format the file can become</figcaption>
+        </figure>
+      </div>
+      <div class="wheels__side">
+        <figure class="wheel-figure">
+          <div class="wheel-static" data-static-wheel="tool" data-file="Skyline.jpg"></div>
+          <figcaption><kbd>Alt</kbd> <span class="figcaption__strong">Tools</span> crop, compress, resize, rotate and more</figcaption>
+        </figure>
+        <figure class="wheel-figure">
+          <div class="wheel-static" data-static-wheel="action" data-file="Skyline.jpg"></div>
+          <figcaption><kbd>Ctrl</kbd> <span class="figcaption__strong">Actions</span> float, move, copy, share, open a terminal</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="formats" id="formats" aria-labelledby="formats-title">
+      <div class="formats__figure">
+        <p class="figure" aria-hidden="true" id="conversion-count">317</p>
+        <h2 id="formats-title" class="title">conversions, all on your machine.</h2>
+        <p class="body">Every pair below runs locally with ffmpeg, pandoc, Pillow, PyMuPDF and LibreOffice. <span id="count-note"></span></p>
+        <ul class="facts">
+          <li><span data-icon="wifi-off"></span>Works offline</li>
+          <li><span data-icon="shield-check"></span>Files never leave your computer</li>
+          <li><span data-icon="layers-2"></span>Batch: drag several files at once</li>
+        </ul>
+      </div>
+      <div class="formats__table-wrap">
+        <table class="formats__table">
+          <caption class="visually-hidden">What Metamorph reads and writes</caption>
+          <thead><tr><th scope="col">Kind</th><th scope="col">Reads</th><th scope="col">Writes</th></tr></thead>
+          <tbody id="formats-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="tour" id="tour" aria-labelledby="tour-title">
+      <div class="tour__copy">
+        <h2 id="tour-title" class="title">See it on a real desktop.</h2>
+        <p class="body">A 97 second recording of the app on Ubuntu: a photo, a video, a PDF, the crop editor, the floating shelf and the keyboard path through Files.</p>
+        <a class="tour__download" href="assets/video/metamorph-demo.mp4" download><span data-icon="download"></span>Download the video (MP4, 3.5 MB)</a>
+      </div>
+      <div class="tour__media">
+        <video controls preload="none" poster="assets/video/poster.jpg" width="1920" height="1080">
+          <source src="assets/video/metamorph-demo.mp4" type="video/mp4">
+        </video>
+      </div>
+    </section>
+
+    <section class="install" id="install" aria-labelledby="install-title">
+      <div class="install__copy">
+        <h2 id="install-title" class="title">Install in a minute.</h2>
+        <p class="body">No root needed. The installer sets up its own Python environment, brings ffmpeg and pandoc if you don't have them, and adds a menu entry and a Files shortcut on <kbd>F4</kbd>.</p>
+        <ul class="requirements">
+          <li>Linux with an X11 session</li>
+          <li>Python 3.12 or newer, GTK 3 bindings</li>
+          <li>Optional: LibreOffice for slides and legacy Office files</li>
+        </ul>
+      </div>
+      <div class="terminal">
+        <div class="terminal__bar">
+          <span class="terminal__title"><span data-icon="terminal"></span>Terminal</span>
+          <button type="button" class="button button--ghost button--small" id="copy-install" data-label="Copy">
+            <span data-icon="copy"></span><span class="button__text">Copy</span>
+          </button>
+        </div>
+        <pre class="terminal__body" id="install-commands"><code><span class="terminal__prompt">$</span> git clone https://github.com/karygauss03/metamorph.git
+<span class="terminal__prompt">$</span> cd metamorph
+<span class="terminal__prompt">$</span> ./install.sh</code></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="brand brand--footer">
+        <img src="assets/img/logo.svg" alt="" class="brand__logo" width="32" height="32">
+        <span class="brand__name">Metamorph</span>
+      </div>
+      <p class="footer__text">Open source under the MIT License. Inspired by Tangerine for Mac; an independent project, not affiliated with it.</p>
+      <a class="footer__link" href="https://github.com/karygauss03/metamorph"><span data-icon="github"></span>karygauss03/metamorph</a>
+    </div>
+  </footer>
+</body>
+</html>
