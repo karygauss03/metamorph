@@ -20,6 +20,10 @@
   <img src="docs/demo.gif" width="880" alt="Dragging a HEIC photo, holding Shift and dropping it on JPG">
 </p>
 
+<p align="center">
+  <a href="https://karygauss03.github.io/metamorph-site/"><b>Try the interactive demo in your browser</b></a>
+</p>
+
 ## Why Metamorph
 
 Converting a file usually means finding the right app or uploading it to a
