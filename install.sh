@@ -39,6 +39,9 @@ mkdir -p "$BIN" "$APPS" "$ICONS"
 chmod +x "$ROOT/bin/metamorph"
 ln -sf "$ROOT/bin/metamorph" "$BIN/metamorph"
 cp "$ROOT/data/metamorph.svg" "$ICONS/metamorph.svg"
+# No MimeType= on purpose: GNOME falls back to apps in ~/.local for any type
+# without an explicit default, so registering types made Metamorph the app that
+# opens photos, music and videos on double-click.
 cat > "$APPS/io.github.metamorph.Metamorph.desktop" <<EOF
 [Desktop Entry]
 Type=Application
@@ -50,7 +53,6 @@ Icon=metamorph
 Terminal=false
 Categories=Utility;GTK;
 Keywords=convert;converter;image;video;audio;pdf;compress;
-MimeType=image/jpeg;image/png;image/webp;image/heic;image/heif;image/tiff;image/avif;image/bmp;image/gif;image/svg+xml;audio/mpeg;audio/mp4;audio/x-m4a;audio/wav;audio/x-wav;audio/flac;audio/ogg;audio/opus;audio/x-aiff;audio/x-ms-wma;audio/aac;video/mp4;video/quicktime;video/x-matroska;video/webm;video/x-msvideo;video/x-ms-wmv;video/mpeg;video/x-flv;video/3gpp;application/pdf;application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/msword;application/vnd.oasis.opendocument.text;text/markdown;text/plain;application/rtf;text/html;application/epub+zip;application/vnd.openxmlformats-officedocument.presentationml.presentation;application/vnd.ms-powerpoint;application/vnd.oasis.opendocument.presentation;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.ms-excel;application/vnd.oasis.opendocument.spreadsheet;text/csv;text/tab-separated-values;application/x-subrip;text/vtt;application/zip;application/x-tar;application/gzip;application/x-compressed-tar;application/vnd.rar;application/x-7z-compressed;
 StartupNotify=false
 EOF
 update-desktop-database "$APPS" 2>/dev/null || true
