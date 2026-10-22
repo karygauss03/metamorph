@@ -14,6 +14,7 @@ class ParamsDialog(Gtk.Window):
 
     def __init__(self, op, paths, on_run):
         super().__init__(title=op.label)
+        self.get_style_context().add_class("metamorph")
         self.op, self.on_run = op, on_run
         self.set_keep_above(True)
         self.set_resizable(False)
@@ -122,6 +123,7 @@ def set_autostart(enabled, exec_path):
 class SettingsWindow(Gtk.ApplicationWindow):
     def __init__(self, app):
         super().__init__(application=app, title="Metamorph")
+        self.get_style_context().add_class("metamorph")
         self.app = app
         self.set_default_size(560, 720)
         header = Gtk.HeaderBar(title="Metamorph", subtitle="Drag, hold a key, drop", show_close_button=True)

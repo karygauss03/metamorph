@@ -6,6 +6,7 @@ import cairo
 from gi.repository import Gdk, GdkPixbuf, GLib, Gtk
 from PIL import Image, ImageOps
 
+from . import theme
 from .engines import images
 from .util import ConversionError
 
@@ -20,16 +21,17 @@ HANDLE = 10        # handle size in view pixels
 GRAB = 12          # pointer tolerance around handles and edges
 PREVIEW_MAX = 1800
 
-CANVAS = (0.11, 0.11, 0.12)
-SHADE = (0, 0, 0, 0.58)
-LINE = (1, 1, 1, 0.95)
+CANVAS = theme.CANVAS[:3]
+SHADE = theme.SHADE
+LINE = theme.TEXT[:3] + (0.95,)
 GUIDE = (1, 1, 1, 0.32)
-ACCENT = (1.0, 0.541, 0.122)
+ACCENT = theme.ACCENT[:3]
 
 
 class CropWindow(Gtk.Window):
     def __init__(self, paths, on_run):
         super().__init__(title="Crop")
+        self.get_style_context().add_class("metamorph")
         self.paths, self.on_run = [Path(p) for p in paths], on_run
         try:
             preview = self._load_preview(self.paths[0])

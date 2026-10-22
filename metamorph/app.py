@@ -12,27 +12,13 @@ gi.require_version("Gdk", "3.0")
 gi.require_version("PangoCairo", "1.0")
 from gi.repository import Gdk, Gio, GLib, Gtk  # noqa: E402
 
-from . import actions, settings  # noqa: E402
+from . import actions, settings, theme  # noqa: E402
 from .dialogs import ParamsDialog, SettingsWindow  # noqa: E402
 from .jobs import Job, JobQueue, Notifier, Toast  # noqa: E402
 from .wheel import Wheel  # noqa: E402
 
 APP_ID = "io.github.metamorph.Metamorph"
 
-CSS = b"""
-.metamorph-toast { border: 1px solid alpha(@theme_fg_color, 0.14); border-radius: 0; }
-.metamorph-card { padding: 4px 2px; }
-.metamorph-card-title { font-weight: bold; }
-.metamorph-error { color: @error_color; }
-.metamorph-dropzone {
-  border: 2px dashed alpha(@theme_fg_color, 0.22);
-  border-radius: 14px;
-  background-color: alpha(@theme_fg_color, 0.03);
-}
-.metamorph-shelf { border: 1px solid alpha(@theme_fg_color, 0.14); }
-.metamorph-shelf-title { font-weight: bold; }
-.metamorph-shelf-item { padding: 6px; }
-"""
 
 
 class App(Gtk.Application):
@@ -48,8 +34,10 @@ class App(Gtk.Application):
 
     def do_startup(self):
         Gtk.Application.do_startup(self)
+        # Dark variant of the desktop theme, then the Metamorph palette on top (theme.py).
+        Gtk.Settings.get_default().set_property("gtk-application-prefer-dark-theme", True)
         provider = Gtk.CssProvider()
-        provider.load_from_data(CSS)
+        provider.load_from_data(theme.CSS.encode())
         Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), provider,
                                                  Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         Gtk.Window.set_default_icon_name("metamorph")

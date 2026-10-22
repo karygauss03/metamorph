@@ -198,6 +198,7 @@ class FloatShelf(Gtk.Window):
 
     def __init__(self, app):
         super().__init__(title="Float")
+        self.get_style_context().add_class("metamorph")
         self.app = app
         self.set_decorated(False)
         self.set_keep_above(True)

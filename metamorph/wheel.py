@@ -5,7 +5,7 @@ from pathlib import Path
 
 from gi.repository import Gdk, Gio, GLib, Gtk, Pango, PangoCairo
 
-from . import registry
+from . import registry, theme
 
 MODES = ("convert", "tool", "action")
 MODE_TITLES = {"convert": "Convert", "tool": "Tools", "action": "Actions"}
@@ -19,16 +19,9 @@ SIZE = 2 * (OUTER + PAD)
 GAP = 3.0                       # px between slices
 INNER_MAX = 8                   # slices on the inner ring before a second ring
 
-# Colours (r, g, b, a). The wheel is a HUD over arbitrary content, so it has its own
-# dark surface instead of following the GTK theme.
-SURFACE = (0.09, 0.09, 0.10, 0.985)
-RIM = (1, 1, 1, 0.10)
-SLICE = (0.16, 0.16, 0.18, 1)
-SLICE_DIM = (0.12, 0.12, 0.135, 1)
-ACCENT = (1.0, 0.541, 0.122, 1)  # tangerine #FF8A1F
-TEXT = (0.96, 0.96, 0.97, 1)
-TEXT_MUTED = (0.66, 0.66, 0.70, 1)
-TEXT_ON_ACCENT = (0.10, 0.06, 0.02, 1)
+# Colours come from the shared palette (theme.py), the same one the website uses.
+SURFACE, RIM, SLICE, SLICE_DIM, HUB_FILL = theme.SURFACE, theme.RIM, theme.SLICE, theme.SLICE_DIM, theme.HUB
+ACCENT, TEXT, TEXT_MUTED, TEXT_ON_ACCENT = theme.ACCENT, theme.TEXT, theme.TEXT_MUTED, theme.TEXT_ON_ACCENT
 
 URI_TARGET = Gtk.TargetEntry.new("text/uri-list", 0, 0)
 
@@ -381,7 +374,7 @@ class Wheel(Gtk.Window):
 
     def _draw_hub(self, cr, c):
         cr.arc(c, c, HUB - 2, 0, 2 * math.pi)
-        _rgba(cr, (0.115, 0.115, 0.13, 1))
+        _rgba(cr, HUB_FILL)
         cr.fill()
         title = MODE_TITLES[self.mode]
         self._text(cr, title, c, c - 30, 12, ACCENT, bold=True)
