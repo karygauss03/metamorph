@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/demo.gif" width="880" alt="Dragging a HEIC photo, holding Shift and dropping it on JPG">
+  <img src="docs/demo-v2.gif" width="880" alt="Dragging a HEIC photo, holding Shift and dropping it on JPG">
 </p>
 
 <p align="center">
@@ -45,7 +45,7 @@ independent project, not affiliated with Tangerine.
 ## Three wheels, three keys
 
 <p align="center">
-  <img src="docs/wheels.png" width="840" alt="The Convert, Tools and Actions wheels">
+  <img src="docs/wheels-v2.png" width="840" alt="The Convert, Tools and Actions wheels">
 </p>
 
 | Hold while dragging | Wheel | What's on it |
@@ -182,6 +182,90 @@ list as soon as the pointer moves over it, offers the formats that apply, and
 runs the slice the file is dropped on. Jobs run in the background, with a
 progress popup in the corner of the screen.
 
+### Architecture
+
+Three entry points feed one resident GTK process: the drag watcher, the Files
+script (<kbd>F4</kbd>) and the command line, which skips the GUI entirely. The
+app controller opens the wheel and routes each choice to an action, a dialog or
+the job queue, and the queue hands work to the registry. Everything below the
+registry is plain Python with no GTK: the engines call external tools through
+`util.py`.
+
+<p align="center">
+  <img src="data/metamorph_layered_architecture.png" width="800" alt="Metamorph's layers: entry points, the resident GTK process, the registry, the engines and util.py">
+</p>
+
+<details>
+<summary><b>Detailed diagram with call names</b></summary>
+
+```mermaid
+%% Metamorph – high-level architecture
+%% https://github.com/karygauss03/metamorph
+flowchart TB
+
+  subgraph entry["Entry points"]
+    direction LR
+    W["<b>Drag watcher</b><br/>watcher.py · XFixes poll thread"]
+    F["<b>Files script / F4</b><br/>metamorph open FILE --mode"]
+    C["<b>CLI</b> · python -m metamorph<br/>list · run · to · doctor"]
+  end
+
+  subgraph gui["Resident GTK process"]
+    A["<b>App controller</b> · app.py<br/>single-instance Gtk.Application"]
+    S[("settings.json<br/>settings.py")]
+    subgraph ui["UI surfaces"]
+      direction LR
+      WH["<b>Wheel</b> · wheel.py<br/>radial XDND drop target"]
+      D["<b>Dialogs, cropper</b><br/>dialogs.py · cropper.py"]
+      AC["<b>Actions</b> · actions.py<br/>share · float · copy · move · terminal"]
+    end
+    Q["<b>Job queue</b> · jobs.py<br/>2-worker ThreadPoolExecutor · Toast · Notifier"]
+  end
+
+  subgraph core["Conversion core (no GTK)"]
+    R["<b>Registry</b> · registry.py<br/>Operation catalog · operations_for() · execute()"]
+    subgraph engines["engines/"]
+      direction LR
+      E1["<b>Images</b><br/>Pillow · pillow-heif"]
+      E2["<b>Media</b><br/>ffmpeg"]
+      E3["<b>PDF & docs</b><br/>PyMuPDF · pandoc"]
+      E4["<b>Office, subs, archives</b><br/>LibreOffice · zip/tar"]
+    end
+  end
+
+  U["<b>util.py</b><br/>backend discovery · subprocess runner · output naming"]
+  X[["External backends<br/>ffmpeg · pandoc · soffice · ghostscript · unrar"]]
+
+  W -- "on_mode(mode, x, y) via GLib.idle_add" --> A
+  F -- "open → show_interactive()" --> A
+  A <-- "load / save" --> S
+  A -- "show_for_drag()" --> WH
+  WH -- "on_choose(op, paths)" --> A
+  WH -. "operations_for(paths, mode)" .-> R
+  A -- "kind == action" --> AC
+  A -- "has params / editor = crop" --> D
+  D -- "submit(op, paths, params)" --> Q
+  A -- "no params → submit()" --> Q
+  Q -- "execute(op, paths, ctx)" --> R
+  C -- "execute() headless" --> R
+  R --> E1 & E2 & E3 & E4
+  E1 & E2 & E3 & E4 --> U
+  U --> X
+
+  classDef gtk fill:#EEEDFE,stroke:#534AB7,color:#3C3489
+  classDef core fill:#E1F5EE,stroke:#0F6E56,color:#085041
+  classDef plain fill:#F1EFE8,stroke:#5F5E5A,color:#444441
+  class A,WH,D,AC,Q,S gtk
+  class R,E1,E2,E3,E4 core
+  class W,F,C,U,X plain
+```
+
+Source: [`data/metamorph-architecture.mmd`](data/metamorph-architecture.mmd)
+
+</details>
+
+### Project layout
+
 ```
 metamorph/
 ├── watcher.py     X11 drag + modifier detection (XFixes, python-xlib)
@@ -192,6 +276,9 @@ metamorph/
 ├── actions.py     share, float shelf, clipboard, move, terminal
 ├── cropper.py     freeform crop editor
 ├── dialogs.py     settings window and tool options
+├── theme.py       the shared palette: cairo colours and the GTK stylesheet
+├── settings.py    user settings in ~/.config/metamorph/settings.json
+├── util.py        backend discovery, subprocess runner, output naming
 └── app.py         single-instance GTK application tying it together
 ```
 
