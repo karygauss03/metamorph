@@ -154,6 +154,7 @@ class Toast(Gtk.Window):
     def __init__(self, queue):
         super().__init__(type=Gtk.WindowType.POPUP)
         self.queue = queue
+        self.get_style_context().add_class("metamorph")
         self.set_keep_above(True)
         self.get_style_context().add_class("metamorph-toast")
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
@@ -227,6 +228,10 @@ class JobCard(Gtk.EventBox):
         self.add(frame)
 
         top = Gtk.Box(spacing=8)
+        # Finished jobs get a green check, failed ones a red mark: status never by colour alone.
+        self.state_icon = Gtk.Image()
+        self.state_icon.set_no_show_all(True)
+        top.pack_start(self.state_icon, False, False, 0)
         self.title = Gtk.Label(xalign=0)
         self.title.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
         self.title.get_style_context().add_class("metamorph-card-title")
@@ -279,6 +284,17 @@ class JobCard(Gtk.EventBox):
         self.status.set_text(text)
         ctx = self.status.get_style_context()
         (ctx.add_class if job.state == "failed" else ctx.remove_class)("metamorph-error")
+        icon_ctx = self.state_icon.get_style_context()
+        icon_ctx.remove_class("metamorph-success")
+        icon_ctx.remove_class("metamorph-error")
+        if job.state in ("done", "failed"):
+            failed = job.state == "failed"
+            self.state_icon.set_from_icon_name("dialog-error-symbolic" if failed else "emblem-ok-symbolic",
+                                               Gtk.IconSize.MENU)
+            icon_ctx.add_class("metamorph-error" if failed else "metamorph-success")
+            self.state_icon.show()
+        else:
+            self.state_icon.hide()
         self.bar.set_visible(job.state in ("queued", "running"))
         if job.state == "running" and not job.progress:
             self.bar.pulse()
